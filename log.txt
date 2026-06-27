@@ -1,0 +1,7 @@
+27 de junio 19:42
+
+Agregué funciones para solicitar la fila y la columna, que además puedan validar el valor que se introduce.
+Cambié la función calcular. Aparentemente había un problema al evaluar m[i][j] == 'X' en la primer columna (0) porque no era X.
+También tuve que agregarle los límites de la matriz a la función calcular
+
+
