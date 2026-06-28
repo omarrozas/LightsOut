@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include <time.h>
 #include "libfun.h"
-#define N 5
-#define F 5
-#define C 5
+#define N 6 //Acá había un error, porque la matriz es de 6x6 pero va de 0 a 5.
 #define TIPO char
 
 int main(){
     long start = time(NULL);
-    char tablero[F][C];
+    char tablero[N][N];
     int seleccion, fil, col;
     char sel = 's';
     printf("1 - Jugar\n2 - Estadisticas\n3 - Salir\n");
@@ -19,10 +17,10 @@ int main(){
             cargar(tablero);
             do{
                 system("clear");
-                dibujar(tablero, N);
-                fil = solicitarf(F);
-                col = solicitarc(C);
-                calcular(tablero, fil, col, F, C);
+                dibujar(tablero, 5);
+                fil = solicitarf(N);
+                col = solicitarc(N);
+                calcular(tablero, fil, col, N, N);
                 //evaluar(tablero)
                 //printf("Desea jugar de nuevo?(s/n) > ");
                // scanf(" %c", &sel);
