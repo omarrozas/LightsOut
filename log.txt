@@ -1,0 +1,27 @@
+##27 de junio 19:42
+
+Agregué funciones para solicitar la fila y la columna, que además puedan validar el valor que se introduce.
+Cambié la función calcular. Aparentemente había un problema al evaluar m[i][j] == 'X' en la primer columna (0) porque no era X.
+También tuve que agregarle los límites de la matriz a la función calcular
+
+##28 de junio 8hs a 14hs
+
+Con Cami mejoramos el programa
+Hicimos la función ganar() que evalúa si el usuario ganó. Pero no funciona todavía.
+Estuvimos probando el programa y sus límites. Anda bastante bien.
+Agregamos carteles y estuvimos revisando como entran los datos.
+
+##28 de junio 19:21hs
+
+Logré que la función ganar evalúe cosas. No toque nada en particular, solo arregle los indentados y ya.
+Agrege una librería <unistd.h> y dos funciones fflush(stdout) y sleep(2) que van a "dormir" al programa después de que muestre el cartel de que se ganó la partida
+Agrego un array <char coordenadas[10]> para meter las jugadas.
+Hice una función para ingresar una sola entrada y distinga si es jugada, reinicio, abandono o error
+
+##29 de junio 18:52
+
+Cambie totalmente el case 1 del switch menu. La función del ingreso de jugada me obligó a hacerlo así.
+Le agregue unas pausas al juego para que sea mas interactivo
+Habilité una sección para estadisticas
+Habilité una opción para salir del programa
+

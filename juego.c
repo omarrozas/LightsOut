@@ -1,48 +1,68 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
-#include "libfun.h"
 #define N 6 //Acá había un error, porque la matriz es de 6x6 pero va de 0 a 5.
 #define TIPO char
 
 void dibujar(char[N][N], int);
 void cargar(char[N][N]);
 void calcular(char[N][N], int, int, int, int);
-int solicitarf(int);
-int solicitarc(int);
 int ganar(char[N][N], int);
+char solicitarJugada(int[], int);
 
 int main(){
     long start = time(NULL);
-    char tablero[N][N];
-    int seleccion, fil, col;
-    char sel = 's';
-    nuevo:
-    system("cls");
-    printf("1 - Jugar\n2 - Estadisticas\n3 - Salir\n");
+    char tablero[N][N], jugada;
+    int seleccion, tamanio;
+    int coordenadas[2]; //va a servir para meter la jugada
+    menu:
+    system("clear");
+    printf("1 - Jugar\n2 - Estadisticas\nPresione cualquier tecla para salir\n");
     scanf(" %d", &seleccion);
     switch(seleccion){
         case 1:
             cargar(tablero);
+            printf("Que tablero desea jugar? (3x3 4x4 5x5)\n");
+            scanf("%d", &tamanio);
             do{
-                system("cls");
-                dibujar(tablero, 3);
-                fil = solicitarf(N);
-                col = solicitarc(N);
-                if (fil==8 || col==8){
+                system("clear");
+                dibujar(tablero, tamanio);
+                if (ganar(tablero, tamanio) == 1){
+                  printf("¡Ganaste!\n");
+                  fflush(stdout);
+                  sleep(2);
+                  goto menu;
+                }//if-ganar
+                jugada = solicitarJugada(coordenadas, tamanio);
+                switch (jugada){
+                  case 'j':
+                    calcular(tablero, coordenadas[0], coordenadas[1], N, N);
+                    break;
+                  case 'r':
                     cargar(tablero);
-                    dibujar(tablero, 3);
-                } else if (fil==9 || col==9) {
-                    goto nuevo;
-                } else {
-                   calcular(tablero, fil, col, N, N);
-                   }
-                if ((ganar(tablero, 3))==1){
-                   printf("¡Ganaste!");}
-                //evaluar(tablero)
-                //printf("Desea jugar de nuevo?(s/n) > ");
-               // scanf(" %c", &sel);
-            }while(sel == 's');
+                    dibujar(tablero, tamanio);
+                    break;
+                  case 'q':
+                    goto menu;
+                  case 'e':
+                    printf("Valores incorrectos! Por favor, ingresá de nuevo tu jugada.\n");
+                    sleep(2);
+                    break;
+                }//switch del case 1
+            }while(1);
+      case 2:
+        system("clear");
+        printf("Por ahora aqui no hay nada!\n");
+        fflush(stdout);
+        sleep(2);
+        goto menu;
+      default:
+        system("clear");
+        printf("NOS VEMOS!\n");
+        fflush(stdout);
+        sleep(2);
+        break;    
     }//switch
     long end = time(NULL);
     printf("%ld\n", end - start);
@@ -62,14 +82,13 @@ void dibujar(char m[N][N], int ene){
             }//if-elseif
         }//for hijo
     }//for padre
-    printf("\nPresiona: 1-%d para jugar | 8 para resetear | 9 para abandonar\n", ene);
+    printf("\nPresiona \nej: '1%d' para fila 1 y columna %d\n'r' para resetear\n'q' para abandonar\n", ene, ene);
 }//dibujar
 
 void calcular(char m[N][N], int fila, int columna, int filaTope, int colTope){
     if (fila == 8 || columna == 8) {
             cargar(m);
-
-    } else {
+    }else{
     for(int i=fila-1;i<=fila+1;i++){
         if(i>0 && i < filaTope){//con esta línea valido que el if no evalúe nada en la fila 0
           if(m[i][columna]=='X'){
@@ -87,8 +106,8 @@ void calcular(char m[N][N], int fila, int columna, int filaTope, int colTope){
               m[fila][j] = 'X';
           }//if-else
         }//if validador
-    }
-}
+    }//for
+  }//if
 }
 
 void cargar(char m[N][N]){
@@ -102,33 +121,9 @@ void cargar(char m[N][N]){
     }//for padre
 }//cargar
 
-int solicitarf(int filas){
-    int filasUsuario;
-    do{
-        printf("\nFila: \n");
-        scanf("%d", &filasUsuario);
-        if (filasUsuario==8 || filasUsuario==9){
-            return filasUsuario;
-        }
-        if (filasUsuario<1 || filasUsuario >= filas) printf("\n*******Fila fuera de rango******* \n");
-    }while(filasUsuario<1 || filasUsuario >= filas);
-    return filasUsuario;
-}//solicitarf
 
-int solicitarc(int columnas){
-    int columnasUsuario;
-    do{
-        printf("\nColumna: \n");
-        scanf("%d", &columnasUsuario);
-        if (columnasUsuario==8 || columnasUsuario==9){
-            return columnasUsuario;
-        }
-        if (columnasUsuario<1 || columnasUsuario >= columnas) printf("\n*******Columna fuera de rango******* \n");
-    }while(columnasUsuario<1 || columnasUsuario >= columnas);
-    return columnasUsuario;
-}//solicitarf
 
-/*int ganar (char m[N][N], int ene){
+int ganar (char m[N][N], int ene){
     for (int i=1;i<=ene;i++){
         for (int j=1;j<=ene;j++){
             if (m[i][j]!=' ')
@@ -136,15 +131,26 @@ int solicitarc(int columnas){
             }
     }
     return 1;
-}*/
- int ganar (char m[N][N], int ene){
-    for (int i=1;i<=ene;i++){
-        for (int j=1;j<=ene;j++){
-            if (m[i][j]=='X'){
-                return 0;
-            }
-    return 1;
 }
-}}
+  
+char solicitarJugada(int co[], int tope){
+  char entrada[10]; //Con 10 espacios por si el jugador mete cualquier cosa
+  printf("Tu jugada: ");
+  scanf(" %s", entrada); //Va sin el &. Ni idea. Para estudiar
+  // Primero evalúo si el jugador quiere abandonar o reiniciar  
+  if (entrada[0]=='r' || entrada[0]=='R') return 'r';
+  if (entrada[0]=='q' || entrada[0]=='Q') return 'q';
+  //Ahora descompongo la jugada
+  int f = entrada[0]-'0'; //se resta '0' porque son chars que tienen un valor int. Ej '3'-'0' = 51-48 = 3 numérico
+  int c = entrada[1]-'0';
+  //Si   
+  if(f > 0 && f <= tope && c > 0 && c<=tope){
+      co[0] = f;
+      co[1] = c;
+      return 'j';      
+  }else{
+      return 'e';
+  }
+}
 
 

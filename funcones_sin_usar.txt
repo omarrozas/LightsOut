@@ -1,0 +1,36 @@
+int ganar (char m[N][N], int ene){
+    for (int i=1;i<=ene;i++){
+        for (int j=1;j<=ene;j++){
+            if (m[i][j]=='X'){
+                return 0;
+            }
+        return 1;
+        }//for columnas
+    }//for filas
+}//ganar
+////////////////////////////////////////////////////////
+int solicitarf(int filas){
+    int filasUsuario;
+    do{
+        printf("\nFila: \n");
+        scanf("%d", &filasUsuario);
+        if (filasUsuario==8 || filasUsuario==9){
+            return filasUsuario;
+        }
+        if (filasUsuario<1 || filasUsuario >= filas) printf("\n*******Fila fuera de rango******* \n");
+    }while(filasUsuario<1 || filasUsuario >= filas);
+    return filasUsuario;
+}//solicitarf
+/////////////////////////////////////////////////////////////////////////////////////////////////
+int solicitarc(int columnas){
+    int columnasUsuario;
+    do{
+        printf("\nColumna: \n");
+        scanf("%d", &columnasUsuario);
+        if (columnasUsuario==8 || columnasUsuario==9){
+            return columnasUsuario;
+        }
+        if (columnasUsuario<1 || columnasUsuario >= columnas) printf("\n*******Columna fuera de rango******* \n");
+    }while(columnasUsuario<1 || columnasUsuario >= columnas);
+    return columnasUsuario;
+}//solicitarf
