@@ -24,4 +24,11 @@ Cambie totalmente el case 1 del switch menu. La función del ingreso de jugada m
 Le agregue unas pausas al juego para que sea mas interactivo
 Habilité una sección para estadisticas
 Habilité una opción para salir del programa
+Cambié la variable "selección" de int a char por un bug que encontré que hacía que después de jugar, cuando apretaba una tecla cualquier para salir, volvía a la opción de jugar. Al ser int, cuando le metía una letra scanf("%d", &seleccion) no leía nada y pasaba la variable con el valor que le quedaba en memoria, que era un 1.
+También corregí la evaluación del reset en la función calcular. Ahora está en la función solicitarJugada y se evalúa su respuesta en el main.
 
+##30 de junio 21:00
+Agregué una matrices globales con juegos precargados para poder seleccionarlos a la hora de cargar
+VOy a dejar la función cargar original para pruebas, después la saco
+Hice una función "cargaral(char[][], int, int)" que elije un tablero dentro de las matrices precargadas, segun la variable "tamanio"
+Saqué el bloque de selección de "tamanio" afuera del case 1. Voy a asignar su valor a una variable para guardarlo y poder resetear el mismo tablero
