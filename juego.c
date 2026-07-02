@@ -7,7 +7,7 @@
 #define TIPO char
 
 // Sección de declaración de funciones
-void dibujar(char[N][N], int);
+void dibujar(char[N][N], int, int);
 void cargar(char[N][N]);
 void calcular(char[N][N], int, int, int);
 int ganar(char[N][N], int);
@@ -18,7 +18,7 @@ void cargaral(char [N][N],int, int);
 const char* JUEGO3[JUEGOS] = {  //Lleva * porque en realidad son strings
 "XXXXXXXXX","X   X   X","X  XX XXX","X XX XXX ","X   XX X ","XX X     ","XXX X X  ","  X XX  X",
 "  XXXXXXX"," XXXX X  ","  X  XXX ","XX  XXXX ","X X     X","X  XXXXX ","XXX XX X "};
-const char* JUEGO4[JUEGOS] = {"        X   XX  ","  X  XXXX X XX  ","X X X XX  X XX",  
+const char* JUEGO4[JUEGOS] = {"        X   XX  ","  X  XXXX X XX  ","X X X XX  X XX",
 "X   XX      XX  ","        X   XX  ","        X  XXXXX","   X  XXX   XXXX"," X XXX XXX  XXXX",
 " XXXX X XXX XXXX","X XX  X XXX XXXX","X     XXXXX XXXX","XXXX   XXXX XXXX","XXXX   XXXXXXX  ",
 "XX      XXXXXX  ","XX      XXX XXXX"};
@@ -32,69 +32,88 @@ const char* JUEGO5[JUEGOS] = {
 int main(){
   srand(getpid());
   long start = time(NULL);
-  char tablero[N][N], jugada, seleccion;
-  int tamanio, indice;
+  char tablero[N][N], jugada, rta, seleccion;
+  int tamanio, indice, cont=0;
   int coordenadas[2]; //va a servir para meter la jugada
   menu:
-  system("clear");
-  printf("Bienvenido\n");    
+  system("cls");
+  printf("Bienvenido\n");
   printf("1 - Jugar\n2 - Estadisticas\nPresione cualquier tecla para salir\n");
   scanf(" %c", &seleccion);
   switch(seleccion){
     case '1':
-      system("clear");
+      system("cls");
       //cargar(tablero);
       do{
-        printf("Que tamaño querés jugar? (3, 4 o 5)\n");
+        printf("¿Que tamaño queres jugar? (3, 4 o 5)\n");
         scanf("%d", &tamanio);
         if(tamanio < 3 || tamanio > 5) printf("Valor incorrecto!\n");
-        }while(tamanio < 3 || tamanio > 5);     
+        }while(tamanio < 3 || tamanio > 5);
       indice = rand()%JUEGOS;//Genera indices entre 0 y 15
       cargaral(tablero, tamanio, indice);
       do{
-        system("clear");
-        dibujar(tablero, tamanio);
+        system("cls");
+        dibujar(tablero, tamanio, cont);
+        cont++;
         if (ganar(tablero, tamanio) == 1){
           printf("¡Ganaste!\n");
+          cont = 0;
           fflush(stdout);
           sleep(2);
           goto menu;
         }//if-ganar
+        if (cont>10){
+            cont--;
+            printf("\nPerdiste :(");
+            printf("\n¿Intentar de nuevo?: s/n \n");
+            scanf("%c", &rta);
+            switch (rta){
+               case 's':
+                  cargaral(tablero, tamanio, indice);
+                  dibujar(tablero, tamanio, cont);
+                  cont=0;
+                  break;
+               case 'n':
+                   goto menu;
+            }
+        } else {
         jugada = solicitarJugada(coordenadas, tamanio);
+        }
         switch (jugada){
           case 'j':
             calcular(tablero, coordenadas[0], coordenadas[1], N);
             break;
           case 'r':
             cargaral(tablero, tamanio, indice);
-            dibujar(tablero, tamanio);
+            dibujar(tablero, tamanio, cont);
+            cont=0;
             break;
           case 'q':
             goto menu;
           case 'e':
-            printf("Valores incorrectos! Por favor, ingresá de nuevo tu jugada.\n");
+            printf("Valores incorrectos! Por favor, ingresa de nuevo tu jugada.\n");
             sleep(2);
             break;
         }//switch del case 1
       }while(1);
       break;
     case '2':
-      system("clear");
+      system("cls");
       printf("Por ahora aqui no hay nada!\n");
       sleep(2);
       goto menu;
     default:
-      system("clear");
+      system("cls");
       printf("NOS VEMOS!\n");
       sleep(2);
-      break;    
+      break;
   }//switch
   long end = time(NULL);
   printf("Tiempo jugado %ld segundos\n", end - start);
   return 0;
 }//main
 
-void dibujar(char m[N][N], int ene){
+void dibujar(char m[N][N], int ene, int contador){
     printf("==========================================================="
       "\nINSTRUCCIONES\n"
       "Para jugar ingresá un numero, Ej: '1%d' para fila 1 y columna %d\n"
@@ -113,7 +132,8 @@ void dibujar(char m[N][N], int ene){
             }//if-elseif
         }//for hijo
     }//for padre
-  printf("\n");
+  printf("\nIntentos: %d \n", contador);
+
 }//dibujar
 
 void calcular(char m[N][N], int fila, int columna, int tope){
@@ -178,22 +198,22 @@ int ganar (char m[N][N], int ene){
   }
   return 1;
 }
-  
+
 char solicitarJugada(int co[], int tope){
   char entrada[10]; //Con 10 espacios por si el jugador mete cualquier cosa
   printf("Tu jugada: ");
   scanf(" %s", entrada); //Va sin el &. Ni idea. Para estudiar
-  // Primero evalúo si el jugador quiere abandonar o reiniciar  
+  // Primero evalúo si el jugador quiere abandonar o reiniciar
   if (entrada[0]=='r' || entrada[0]=='R') return 'r';
   if (entrada[0]=='q' || entrada[0]=='Q') return 'q';
   //Ahora descompongo la jugada
   int f = entrada[0]-'0'; //se resta '0' porque son chars que tienen un valor int. Ej '3'-'0' = 51-48 = 3 numérico
   int c = entrada[1]-'0';
-  //Si   
+  //Si
   if(f > 0 && f <= tope && c > 0 && c<=tope){
       co[0] = f;
       co[1] = c;
-      return 'j';      
+      return 'j';
   }else{
       return 'e';
   }
