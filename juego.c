@@ -2,19 +2,21 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#include <conio.h>
 #define N 6 //Acá había un error, porque la matriz es de 6x6 pero va de 0 a 5.
 #define JUEGOS 15
-#define TIPO char
+#define CONTADOR 3 //esta linea es para reemplazar la cantidad de jugadas. Va a ser de CONTADOR x tamanio
+#define MSG "clear"
+#define VACIARBUFFER() {int c; while((c=getchar()) != '\n' && c != EOF);}
 
+//Sección de declaración de funciones
 void dibujar(char[N][N], int, int);
 void cargar(char[N][N]);
 void calcular(char[N][N], int, int, int);
 int ganar(char[N][N], int);
-int perder(int);
+int perder(int, int);
 char solicitarJugada(int[], int);
 void cargaral(char [N][N],int, int);
-void estadisticas(int, int, int, int, int, int, int);
+void estadisticas(int, int [], int [], int []);
 
 //Sección de variables globales
 const char* JUEGO3[JUEGOS] = {  //Lleva * porque son strings
@@ -33,113 +35,116 @@ const char* JUEGO5[JUEGOS] = {
 
 int main(){
   srand(getpid());
-  long start = time(NULL);
+  long start = time(NULL), tiempo;
   char tablero[N][N], jugada, rta, seleccion, continuar;
-  int tamanio, indice, cont, tiempo;
-  int victorias3=0, victorias4=0, victorias5=0;
-  int perdidos3=0, perdidos4=0, perdidos5=0;
+  int tamanio, indice, cont;
+  int victorias[] = {0,0,0};
+  int perdidos[] = {0,0,0};
+  int abandonados[] = {0,0,0};
   int coordenadas[2];
 
   do {
+    menu:    
     cont=0;
-    system("cls");
+    system(MSG);
     printf("Bienvenido\n");
-
-    printf("1 - Jugar\n2 - Estadisticas\n3 - Salir\n");
+    printf("1 - Jugar\n2 - Estadisticas\nPresiona cualquier tecla para salir\n");
     scanf(" %c", &seleccion);
 
     switch(seleccion){
         case '1':
-            system("cls");
+            system(MSG);
+            // Ingreso el tamaño del juego
             do{
                     printf("¿Que tamaño queres jugar? (3, 4 o 5)\n");
                     scanf("%d", &tamanio);
                     if(tamanio < 3 || tamanio > 5) printf("Valor incorrecto!\n");
             }while(tamanio < 3 || tamanio > 5);
-
-        indice = rand()%JUEGOS;//Genera indices entre 0 y 15
-        cargaral(tablero, tamanio, indice);
-        long start = time(NULL);
-
-        while (cont<=10){
-                system("cls");
-                dibujar(tablero, tamanio, cont);
+            // Genero un indice aleatorio fijo, cargo un tablero aleatorio y comienzo a contar el tiempo
+            indice = rand()%JUEGOS;//Genera indices entre 0 y 15
+            cargaral(tablero, tamanio, indice); 
+            long start = time(NULL);
+            //
+            while (cont<=CONTADOR*tamanio){
+              system(MSG);
+              dibujar(tablero, tamanio, cont);
+              //Primero evaluo si el tablero está ganado
+              if (ganar(tablero, tamanio) == 1){
+                printf("¡Ganaste!\n");
+                long end = time(NULL);
+                tiempo = end - start;
+                printf("\nTiempo jugado %ld segundos\n", tiempo);
+                cont = 0;
+                if (tamanio==3) victorias[0]++;
+                if (tamanio==4) victorias[1]++;
+                if (tamanio==5) victorias[2]++;
+                VACIARBUFFER();
+                sleep(2);
+                break;
+              }
+              //Despues evalúo si el tablero está perdido
+              if ((perder(cont, tamanio))==1){
+                printf("\nPerdiste :(\n");
+                long end = time(NULL);
+                tiempo = end - start;
+                printf("\nTiempo jugado %ld segundos\n", tiempo);
+                printf("¿Intentar de nuevo?: s/n \n");
+                scanf(" %c", &rta);
+              // Si pierdo elijo si quiero volver a jugar                
+                switch (rta){
+                  case 's':
+                    cargaral(tablero, tamanio, indice);
+                    dibujar(tablero, tamanio, cont);
+                    cont=0;
+                    continue;
+                  case 'n':
+                    if (tamanio==3) perdidos[0]++;
+                    if (tamanio==4) perdidos[1]++;
+                    if (tamanio==5) perdidos[2]++;
+                    estadisticas(tamanio, victorias, perdidos, abandonados);
+                    goto menu;
+                }//switch de rta
+              } else { //Por último, si no gané ni perdí, solicito la jugada.
+                jugada = solicitarJugada(coordenadas, tamanio);
                 cont++;
-                if (ganar(tablero, tamanio) == 1){
-                        printf("¡Ganaste!\n");
-                        long end = time(NULL);
-                        tiempo = end - start;
-                        printf("\nTiempo jugado %ld segundos\n", tiempo);
-                        cont = 0;
-                        if (tamanio==3) victorias3++;
-                        if (tamanio==4) victorias4++;
-                        if (tamanio==5) victorias5++;
-                        fflush(stdout);
-                        sleep(2);
-                        break;
-                }
+              }
 
-                if ((perder (cont))==1){
-                        printf("\nPerdiste :(\n");
-                        long end = time(NULL);
-                        tiempo = end - start;
-                        printf("\nTiempo jugado %ld segundos\n", tiempo);
-                        if (tamanio==3) perdidos3++;
-                        if (tamanio==4) perdidos4++;
-                        if (tamanio==5) perdidos5++;
-                        printf("¿Intentar de nuevo?: s/n \n");
-                        scanf(" %c", &rta);
-                        switch (rta){
-                            case 's':
-                                cargaral(tablero, tamanio, indice);
-                                dibujar(tablero, tamanio, cont);
-                                cont=0;
-                                continue;
-                            case 'n':
-                                break;
-                        }
-                } else {
-                    jugada = solicitarJugada(coordenadas, tamanio);
-                }
-
-                switch (jugada){
-                    case 'j':
-                        calcular(tablero, coordenadas[0], coordenadas[1], N);
-                        break;
-                    case 'r':
-                        cargaral(tablero, tamanio, indice);
-                        dibujar(tablero, tamanio, cont);
-                        cont=0;
-                        break;
-                    case 'q':
-                        break;
-                    case 'e':
-                        printf("Valores incorrectos. Por favor, ingresa de nuevo tu jugada.\n");
-                        sleep(1);
-                        break;
-                        }//switch del case 1
-        } break;
-
-        case '2':
-            system("cls");
-            estadisticas(tamanio, victorias3, victorias4, victorias5, perdidos3, perdidos4, perdidos5);
-            //sleep(2);
-            printf("\nPresiona cualquier tecla para continuar");
-            _getch();
+              switch (jugada){
+                case 'j':
+                  calcular(tablero, coordenadas[0], coordenadas[1], tamanio);
+                  break;
+                case 'r':
+                  cargaral(tablero, tamanio, indice);
+                  dibujar(tablero, tamanio, cont);
+                  cont=0;
+                  break;
+                case 'q':
+                  if (tamanio==3) abandonados[0]++;
+                  if (tamanio==4) abandonados[1]++;
+                  if (tamanio==5) abandonados[2]++;
+                  estadisticas(tamanio, victorias, perdidos, abandonados);
+                  goto menu;
+                  break;
+                case 'e':
+                  printf("Valores incorrectos. Por favor, ingresa de nuevo tu jugada.\n");
+                  sleep(1);
+                  break;
+              }//switch de jugada
+            }//while
             break;
 
-        case '3':
-            system("cls");
-            printf("\n NOS VEMOS!\n");
+        case '2':
+            system(MSG);
+            estadisticas(tamanio, victorias, perdidos, abandonados);
             break;
 
         default:
-            system("cls");
+            system(MSG);
+            printf("\n NOS VEMOS!\n");
             sleep(2);
-            break;
+            return 0;
     }//switch seleccion
-  } while (seleccion != '3');
-
+  } while (1);
     return 0;
 }
 
@@ -168,7 +173,7 @@ void dibujar(char m[N][N], int ene, int contador){
 
 void calcular(char m[N][N], int fila, int columna, int tope){
   for(int i=fila-1;i<=fila+1;i++){
-    if(i>0 && i < tope){//con esta línea valido que el if no evalúe nada en la fila 0
+    if(i>0 && i <= tope){//con esta línea valido que el if no evalúe nada en la fila 0
       if(m[i][columna]=='X'){
         m[i][columna] = ' ';
       }else if(m[i][columna]==' '){
@@ -177,7 +182,7 @@ void calcular(char m[N][N], int fila, int columna, int tope){
     }//if validador
   }//for
   for(int j=columna-1;j<=columna+1;j+=2){
-    if(j>0 && j < tope){ //con esta línea valido que el if no evalúe nada en la columna 0
+    if(j>0 && j <= tope){ //con esta línea valido que el if no evalúe nada en la columna 0
       if(m[fila][j]=='X'){
         m[fila][j] = ' ';
       }else if(m[fila][j]==' '){
@@ -229,11 +234,11 @@ int ganar (char m[N][N], int ene){
   return 1;
 }
 
-int perder(int intentos){
- if (intentos>10){
+int perder(int intentos, int tam){
+ if (intentos>=CONTADOR*tam){
     return 1;
  } else {
-     return 0;
+    return 0;
  }
 }
 
@@ -257,10 +262,22 @@ char solicitarJugada(int co[], int tope){
   }
 }
 
-void estadisticas(int tamanio, int v3, int v4, int v5, int p3, int p4, int p5){
-printf("\nEstadísticas: \n");
-printf("\nPartidas en 3x3\nGanadas: %d   vs   Perdidas: %d", v3, p3);
-printf("\nPartidas en 4x4\nGanadas: %d   vs   Perdidas: %d", v4, p4);
-printf("\nPartidas en 5x5\nGanadas: %d   vs   Perdidas: %d", v5, p5);
-}
-
+void estadisticas(int tamanio, int v[], int p[], int a[]){
+  int bandera = 0;  
+  printf("\nEstadísticas:\n");
+  for(int i = 0 ; i<=2 ; i++){
+    if (a[i] != 0) bandera = 1; 
+  }
+  if (bandera == 0){
+    printf("\nPartidas en 3x3\t\tGanadas: %d\tPerdidas: %d", v[0], p[0]);
+    printf("\nPartidas en 4x4\t\tGanadas: %d\tPerdidas: %d", v[1], p[1]);
+    printf("\nPartidas en 5x5\t\tGanadas: %d\tPerdidas: %d", v[2], p[2]);
+  } else {
+    printf("\nPartidas en 3x3\t\tGanadas: %d\tPerdidas: %d\tAbandonadas: %d", v[0], p[0], a[0]);
+    printf("\nPartidas en 4x4\t\tGanadas: %d\tPerdidas: %d\tAbandonadas: %d", v[1], p[1], a[1]);
+    printf("\nPartidas en 5x5\t\tGanadas: %d\tPerdidas: %d\tAbandonadas: %d", v[2], p[2], a[2]);
+  }
+  printf("\nPresiona cualquier tecla para continuar\n");           
+  VACIARBUFFER(); 
+  getchar();//cambie _getch() por getchar metido en una macro
+}//estadisticas
