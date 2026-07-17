@@ -16,7 +16,7 @@ int ganar(char[N][N], int);
 int perder(int, int);
 char solicitarJugada(int[], int);
 void cargaral(char [N][N],int, int);
-void estadisticas(int, int [], int [], int []);
+void estadisticas(int [], int [], int []);
 
 //Sección de variables globales
 const char *JUEGO3[JUEGOS] = {  //Lleva * porque son strings
@@ -120,7 +120,7 @@ int main(){
                     if (tamanio==3) perdidos[0]++;
                     if (tamanio==4) perdidos[1]++;
                     if (tamanio==5) perdidos[2]++;
-                    estadisticas(tamanio, victorias, perdidos, abandonados);
+                    estadisticas(victorias, perdidos, abandonados);
                     goto menu;
                 }//switch de rta
               //Por último, si no gané ni perdí, solicito la jugada.
@@ -146,7 +146,7 @@ int main(){
                   if (tamanio==3) abandonados[0]++;
                   if (tamanio==4) abandonados[1]++;
                   if (tamanio==5) abandonados[2]++;
-                  estadisticas(tamanio, victorias, perdidos, abandonados);
+                  estadisticas(victorias, perdidos, abandonados);
                   goto menu;
                   break;
                 case 'e':
@@ -159,7 +159,7 @@ int main(){
 
         case '2':
             system(MSG);
-            estadisticas(tamanio, victorias, perdidos, abandonados);
+            estadisticas(victorias, perdidos, abandonados);
             break;
 
         default:
@@ -179,7 +179,7 @@ void dibujar(char m[N][N], int ene, int contador){
       "'r' para resetear\n"
       "'q' para abandonar\n"
       "===========================================================\n\n", ene, ene);
-    for(int i=0;i<=ene;i++){ //filas
+    for(int i=0;i<=ene;i++){ 
         if(i!=0) printf("\n");
         for(int j=0;j<=ene;j++){
             if (i==0){
@@ -292,7 +292,7 @@ char solicitarJugada(int co[], int tope){
   }
 }
 
-void estadisticas(int tamanio, int v[], int p[], int a[]){
+void estadisticas(int v[], int p[], int a[]){
   int bandera = 0; //Bandera que indica si el jugador abandonó al menos una partida.
   printf("\nEstadísticas:\n");
   for(int i = 0 ; i<=2 ; i++){
